@@ -77,7 +77,7 @@ namespace TechnicalSupportServiceEmulationRequests
                 }
                 else
                 {
-                    Console.WriteLine($"Error send request with ID:[{requestID}]");
+                    Console.WriteLine($"Error send request with ID:[{requestID}]"); 
                 }
 
                 Thread.Sleep(timeSecBetweenQueries * 1000);
