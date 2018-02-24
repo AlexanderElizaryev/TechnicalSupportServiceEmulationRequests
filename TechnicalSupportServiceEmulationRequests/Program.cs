@@ -58,32 +58,36 @@ namespace TechnicalSupportServiceEmulationRequests
             });
             
             int currentRequest = 1;
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(urlApiOperationService);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            HttpResponseMessage response = null;
-            //var jsonString = "{\"appid\":1,\"platformid\":1,\"rating\":3}";
-            var httpContent = new StringContent("{}", Encoding.UTF8, "application/json");
-
-            while (true)
+            using (HttpClient client = new HttpClient())
             {
-                string requestID = Guid.NewGuid().ToString();
-                Console.WriteLine($"Send request with ID:[{requestID}] of {currentRequest}");
-                response = client.PutAsync(requestID, httpContent).Result;
-                if (response.IsSuccessStatusCode)
-                {
-                    var result = response.Content.ReadAsStringAsync().Result;
-                    Console.WriteLine($"Success send request with ID:[{requestID}] and result is {result}");
-                }
-                else
-                {
-                    Console.WriteLine($"Error send request with ID:[{requestID}]"); 
-                }
+                client.BaseAddress = new Uri(urlApiOperationService);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                Thread.Sleep(timeSecBetweenQueries * 1000);
+                while (true)
+                {
+                    var httpContent = new StringContent("{}", Encoding.UTF8, "application/json");
+                    string requestID = Guid.NewGuid().ToString();
+                    Console.WriteLine($"Send request with ID:[{requestID}] of {currentRequest}");
+                    var response = client.PutAsync(requestID, httpContent).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var result = response.Content.ReadAsStringAsync().Result;
+                        Console.WriteLine($"Success send request with ID:[{requestID}] and result is {result}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Error send request with ID:[{requestID}]");
+                    }
 
-                currentRequest++;
-                if (checkStopApp(currentRequest, countRequest)) break;
+                    Thread.Sleep(timeSecBetweenQueries * 1000);
+
+                    currentRequest++;
+                    if (checkStopApp(currentRequest, countRequest)) break;
+
+                    httpContent = null;
+                    response = null;
+                    GC.Collect();
+                }
             }
 
             Console.WriteLine("Press any key for close application.");
