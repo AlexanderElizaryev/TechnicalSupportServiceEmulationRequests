@@ -32,11 +32,11 @@ namespace TechnicalSupportServiceEmulationRequests
             Console.WriteLine("Start application for emulation client request.");
             Console.WriteLine("Initialize parameters.");
 
-            var timeSecBetweenQueries = int.Parse(ConfigurationManager.AppSettings["TimeSecBetweenQueries"]);
+            var timeMsBetweenQueries = int.Parse(ConfigurationManager.AppSettings["TimeMsBetweenQueries"]);
             var countRequest = int.Parse(ConfigurationManager.AppSettings["CountRequest"]);
             var urlApiOperationService = ConfigurationManager.AppSettings["UrlApiOperationService"];
 
-            Console.WriteLine($"TimeSecBetweenQueries:{timeSecBetweenQueries}");
+            Console.WriteLine($"TimeSecBetweenQueries:{timeMsBetweenQueries}");
             Console.WriteLine($"CountRequest:{countRequest}");
             Console.WriteLine($"UrlApiOperationService:{urlApiOperationService}");
 
@@ -68,24 +68,13 @@ namespace TechnicalSupportServiceEmulationRequests
                     var httpContent = new StringContent("{}", Encoding.UTF8, "application/json");
                     string requestID = Guid.NewGuid().ToString();
                     Console.WriteLine($"Send request with ID:[{requestID}] of {currentRequest}");
-                    var response = client.PutAsync(requestID, httpContent).Result;
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var result = response.Content.ReadAsStringAsync().Result;
-                        Console.WriteLine($"Success send request with ID:[{requestID}] and result is {result}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Error send request with ID:[{requestID}]");
-                    }
-
-                    Thread.Sleep(timeSecBetweenQueries * 1000);
+                    client.PutAsync(requestID, httpContent);
+                    Thread.Sleep(timeMsBetweenQueries);
 
                     currentRequest++;
                     if (checkStopApp(currentRequest, countRequest)) break;
 
                     httpContent = null;
-                    response = null;
                     GC.Collect();
                 }
             }
